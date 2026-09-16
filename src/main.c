@@ -7,17 +7,22 @@
 #include "../include/parser.h"
 #include "../include/process.h"
 #include "../include/builtin.h"
+#include "../include/signals.h"
 
 int main()
 {
     char *line;
     char **tokens;
 
+    /* Initialize signal handling */
+    initialize_signals();
+
     printf("=========================================\n");
     printf("      %s Version %s\n", SHELL_NAME, VERSION);
     printf("=========================================\n");
     printf("        CLOUD ADMINISTRATION SHELL\n");
     printf("=========================================\n");
+    printf("Signal handling enabled.\n");
     printf("Type 'help' to see available commands.\n\n");
 
     while (1)
@@ -42,8 +47,8 @@ int main()
         }
 
         /*
-         * Check whether the command is a built-in command.
-         * If it is not built-in, execute it as an external command.
+         * Check for built-in commands first.
+         * If not built-in, execute as an external command.
          */
         if (execute_builtin(tokens) == 0)
         {
