@@ -6,6 +6,7 @@
 #include "../include/input.h"
 #include "../include/parser.h"
 #include "../include/process.h"
+#include "../include/builtin.h"
 
 int main()
 {
@@ -15,8 +16,9 @@ int main()
     printf("=========================================\n");
     printf("      %s Version %s\n", SHELL_NAME, VERSION);
     printf("=========================================\n");
-    printf("Cloud Administration Shell\n");
-    printf("Type Linux commands or 'exit' to quit.\n\n");
+    printf("        CLOUD ADMINISTRATION SHELL\n");
+    printf("=========================================\n");
+    printf("Type 'help' to see available commands.\n\n");
 
     while (1)
     {
@@ -39,13 +41,20 @@ int main()
             continue;
         }
 
-        execute(tokens);
+        /*
+         * Check whether the command is a built-in command.
+         * If it is not built-in, execute it as an external command.
+         */
+        if (execute_builtin(tokens) == 0)
+        {
+            execute(tokens);
+        }
 
         free_tokens(tokens);
         free(line);
     }
 
-    printf("Goodbye from Cloud Administration Shell!\n");
+    printf("\nGoodbye from Cloud Administration Shell!\n");
 
     return 0;
 }
