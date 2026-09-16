@@ -1,12 +1,16 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
+#include "../include/shell.h"
+#include "../include/input.h"
 
 int main()
 {
-    char input[1024];
+    char *line;
 
     printf("=========================================\n");
-    printf("       Cloud Administration Shell\n");
+    printf("      %s Version %s\n", SHELL_NAME, VERSION);
     printf("=========================================\n");
     printf("Type 'help' to see available commands.\n\n");
 
@@ -14,21 +18,19 @@ int main()
     {
         printf("cloud-admin> ");
 
-        if (fgets(input, sizeof(input), stdin) == NULL)
+        line = read_line();
+
+        /* Exit command */
+        if (strcmp(line, "exit") == 0)
         {
+            free(line);
             break;
         }
 
-        input[strcspn(input, "\n")] = '\0';
-
-        if (strcmp(input, "exit") == 0)
+        /* Help command */
+        else if (strcmp(line, "help") == 0)
         {
-            printf("Exiting Cloud Administration Shell...\n");
-            break;
-        }
-        else if (strcmp(input, "help") == 0)
-        {
-            printf("\nAvailable Commands:\n");
+            printf("\nCloud Administration Commands:\n");
             printf("help          - Show available commands\n");
             printf("list-vm       - List virtual machines\n");
             printf("start-vm      - Start a virtual machine\n");
@@ -38,41 +40,69 @@ int main()
             printf("list-users    - List cloud users\n");
             printf("exit          - Exit the shell\n\n");
         }
-        else if (strcmp(input, "list-vm") == 0)
+
+        /* List virtual machines */
+        else if (strcmp(line, "list-vm") == 0)
         {
+            printf("\nVirtual Machines:\n");
             printf("VM-01 : Running\n");
             printf("VM-02 : Stopped\n");
-            printf("VM-03 : Running\n");
+            printf("VM-03 : Running\n\n");
         }
-        else if (strcmp(input, "start-vm") == 0)
+
+        /* Start virtual machine */
+        else if (strcmp(line, "start-vm") == 0)
         {
             printf("Virtual machine started successfully.\n");
         }
-        else if (strcmp(input, "stop-vm") == 0)
+
+        /* Stop virtual machine */
+        else if (strcmp(line, "stop-vm") == 0)
         {
             printf("Virtual machine stopped successfully.\n");
         }
-        else if (strcmp(input, "server-status") == 0)
+
+        /* Server status */
+        else if (strcmp(line, "server-status") == 0)
         {
             printf("Cloud Server Status: ONLINE\n");
         }
-        else if (strcmp(input, "list-storage") == 0)
+
+        /* List storage */
+        else if (strcmp(line, "list-storage") == 0)
         {
+            printf("\nStorage Resources:\n");
             printf("Storage-01 : 500 GB\n");
-            printf("Storage-02 : 1 TB\n");
+            printf("Storage-02 : 1 TB\n\n");
         }
-        else if (strcmp(input, "list-users") == 0)
+
+        /* List users */
+        else if (strcmp(line, "list-users") == 0)
         {
+            printf("\nCloud Users:\n");
             printf("Admin\n");
             printf("Developer\n");
-            printf("Guest\n");
+            printf("Guest\n\n");
         }
+
+        /* Empty command */
+        else if (strlen(line) == 0)
+        {
+            /* Do nothing */
+        }
+
+        /* Unknown command */
         else
         {
-            printf("Unknown command: %s\n", input);
+            printf("Unknown command: %s\n", line);
             printf("Type 'help' for available commands.\n");
         }
+
+        /* Free dynamically allocated memory */
+        free(line);
     }
+
+    printf("Goodbye from Cloud Administration Shell!\n");
 
     return 0;
 }

@@ -1,8 +1,10 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g -Iinclude
 
-SRC = src/main.c
-TARGET = bin/cloud_admin_shell
+SRC = src/main.c \
+      src/input.c
+
+TARGET = bin/cloudadmin_shell
 
 all: $(TARGET)
 

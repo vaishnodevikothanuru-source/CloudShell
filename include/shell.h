@@ -1,5 +1,5 @@
-#ifndef CLOUD_H
-#define CLOUD_H
+#ifndef SHELL_H
+#define SHELL_H
 
 #define SHELL_NAME "Cloud Administration Shell"
 #define VERSION "2.0"
