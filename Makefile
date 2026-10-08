@@ -13,12 +13,12 @@ TARGET = bin/cloudadmin_shell
 
 all: $(TARGET)
 
-$(TARGET): $(SRC)
+$(TARGET):
 	mkdir -p bin
 	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
 
-run: $(TARGET)
-	./$(TARGET)
+asan:
+	$(CC) $(CFLAGS) -fsanitize=address $(SRC) -o $(TARGET)
 
 clean:
-	rm -rf bin
+	rm -rf bin/*
