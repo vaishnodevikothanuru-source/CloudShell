@@ -9,6 +9,7 @@
 #include "../include/builtin.h"
 #include "../include/signals.h"
 #include "../include/pipes.h"
+#include "../include/redirect.h"
 
 /* Tokenize one side of a pipe */
 static void tokenize(char *str, char **argv)
@@ -31,7 +32,6 @@ int main()
     char *line;
     char **tokens;
 
-    /* Initialize signal handling */
     initialize_signals();
 
     printf("=========================================\n");
@@ -39,7 +39,7 @@ int main()
     printf("=========================================\n");
     printf("        CLOUD ADMINISTRATION SHELL\n");
     printf("=========================================\n");
-    printf("Pipe and IPC support enabled.\n");
+    printf("Pipes and I/O redirection enabled.\n");
     printf("Type 'help' to see available commands.\n\n");
 
     while (1)
@@ -55,7 +55,7 @@ int main()
         }
 
         /*
-         * Check whether the command contains a pipe
+         * Check for pipe
          */
         if (strchr(line, '|') != NULL)
         {
@@ -99,11 +99,20 @@ int main()
             }
 
             /*
-             * Check built-in commands first
+             * Built-in commands first
              */
             if (execute_builtin(tokens) == 0)
             {
-                execute(tokens);
+                /*
+                 * Check for I/O redirection
+                 */
+                if (execute_redirection(tokens) == 0)
+                {
+                    /*
+                     * Normal external command
+                     */
+                    execute(tokens);
+                }
             }
 
             free_tokens(tokens);

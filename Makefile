@@ -7,15 +7,19 @@ SRC = src/main.c \
       src/process.c \
       src/builtin.c \
       src/signals.c \
-      src/pipes.c
+      src/pipes.c \
+      src/redirect.c
 
 TARGET = bin/cloudadmin_shell
 
 all: $(TARGET)
 
-$(TARGET):
+$(TARGET): $(SRC)
 	mkdir -p bin
 	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
+
+run: $(TARGET)
+	./$(TARGET)
 
 asan:
 	$(CC) $(CFLAGS) -fsanitize=address $(SRC) -o $(TARGET)
