@@ -1,127 +1,160 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
-#include "../include/shell.h"
-#include "../include/input.h"
-#include "../include/parser.h"
-#include "../include/process.h"
-#include "../include/builtin.h"
-#include "../include/signals.h"
-#include "../include/pipes.h"
-#include "../include/redirect.h"
+#include "cloud.h"
+#include "vm.h"
+#include "storage.h"
+#include "network.h"
+#include "monitor.h"
 
-/* Tokenize one side of a pipe */
-static void tokenize(char *str, char **argv)
+#define MAX_INPUT 100
+
+void show_help(void)
 {
-    int i = 0;
-
-    char *token = strtok(str, " \t\n");
-
-    while (token != NULL)
-    {
-        argv[i++] = token;
-        token = strtok(NULL, " \t\n");
-    }
-
-    argv[i] = NULL;
+    printf("\nCloud Administration Shell Commands\n");
+    printf("--------------------------------------\n");
+    printf("login                         Login to cloud\n");
+    printf("logout                        Logout from cloud\n");
+    printf("cloud-status                  Show cloud status\n");
+    printf("list-vm                       List virtual machines\n");
+    printf("start-vm <name>               Start virtual machine\n");
+    printf("stop-vm <name>                Stop virtual machine\n");
+    printf("status-vm <name>              Show VM status\n");
+    printf("list-storage                  List cloud storage\n");
+    printf("create-storage <name>         Create storage\n");
+    printf("delete-storage <name>         Delete storage\n");
+    printf("list-network                  List networks\n");
+    printf("network-status                Show network status\n");
+    printf("monitor                       Start monitoring\n");
+    printf("help                          Show commands\n");
+    printf("exit                          Exit shell\n");
 }
 
-int main()
+int main(void)
 {
-    char *line;
-    char **tokens;
+    char input[MAX_INPUT];
+    char command[30];
+    char argument[50];
 
-    initialize_signals();
+    printf("========================================\n");
+    printf("      CLOUD ADMINISTRATION SHELL\n");
+    printf("========================================\n");
 
-    printf("=========================================\n");
-    printf("      %s Version %s\n", SHELL_NAME, VERSION);
-    printf("=========================================\n");
-    printf("        CLOUD ADMINISTRATION SHELL\n");
-    printf("=========================================\n");
-    printf("Pipes and I/O redirection enabled.\n");
-    printf("Type 'help' to see available commands.\n\n");
+    printf("Type 'help' to display available commands.\n");
 
     while (1)
     {
-        printf("cloud-admin> ");
+        printf("\ncloud> ");
 
-        line = read_line();
-
-        if (strcmp(line, "exit") == 0)
+        if (fgets(input, sizeof(input), stdin) == NULL)
         {
-            free(line);
             break;
         }
 
-        /*
-         * Check for pipe
-         */
-        if (strchr(line, '|') != NULL)
+        input[strcspn(input, "\n")] = '\0';
+
+        if (sscanf(input, "%29s %49s", command, argument) < 1)
         {
-            char *argv1[64];
-            char *argv2[64];
-
-            char *left = strtok(line, "|");
-            char *right = strtok(NULL, "|");
-
-            if (left == NULL || right == NULL)
-            {
-                printf("Invalid pipe command.\n");
-                free(line);
-                continue;
-            }
-
-            tokenize(left, argv1);
-            tokenize(right, argv2);
-
-            if (argv1[0] == NULL || argv2[0] == NULL)
-            {
-                printf("Invalid pipe command.\n");
-                free(line);
-                continue;
-            }
-
-            execute_pipe(argv1, argv2);
+            continue;
         }
+
+        if (strcmp(command, "login") == 0)
+        {
+            cloud_login();
+        }
+
+        else if (strcmp(command, "logout") == 0)
+        {
+            cloud_logout();
+        }
+
+        else if (strcmp(command, "cloud-status") == 0)
+        {
+            cloud_status();
+        }
+
+        else if (strcmp(command, "list-vm") == 0)
+        {
+            list_vms();
+        }
+
+        else if (strcmp(command, "start-vm") == 0)
+        {
+            if (sscanf(input, "%*s %49s", argument) == 1)
+                start_vm(argument);
+            else
+                printf("Usage: start-vm <name>\n");
+        }
+
+        else if (strcmp(command, "stop-vm") == 0)
+        {
+            if (sscanf(input, "%*s %49s", argument) == 1)
+                stop_vm(argument);
+            else
+                printf("Usage: stop-vm <name>\n");
+        }
+
+        else if (strcmp(command, "status-vm") == 0)
+        {
+            if (sscanf(input, "%*s %49s", argument) == 1)
+                status_vm(argument);
+            else
+                printf("Usage: status-vm <name>\n");
+        }
+
+        else if (strcmp(command, "list-storage") == 0)
+        {
+            list_storage();
+        }
+
+        else if (strcmp(command, "create-storage") == 0)
+        {
+            if (sscanf(input, "%*s %49s", argument) == 1)
+                create_storage(argument);
+            else
+                printf("Usage: create-storage <name>\n");
+        }
+
+        else if (strcmp(command, "delete-storage") == 0)
+        {
+            if (sscanf(input, "%*s %49s", argument) == 1)
+                delete_storage(argument);
+            else
+                printf("Usage: delete-storage <name>\n");
+        }
+
+        else if (strcmp(command, "list-network") == 0)
+        {
+            list_network();
+        }
+
+        else if (strcmp(command, "network-status") == 0)
+        {
+            network_status();
+        }
+
+        else if (strcmp(command, "monitor") == 0)
+        {
+            start_monitor_thread();
+        }
+
+        else if (strcmp(command, "help") == 0)
+        {
+            show_help();
+        }
+
+        else if (strcmp(command, "exit") == 0)
+        {
+            printf("Exiting Cloud Administration Shell...\n");
+            break;
+        }
+
         else
         {
-            /*
-             * Normal command
-             */
-            tokens = parse_line(line);
-
-            if (tokens[0] == NULL)
-            {
-                free_tokens(tokens);
-                free(line);
-                continue;
-            }
-
-            /*
-             * Built-in commands first
-             */
-            if (execute_builtin(tokens) == 0)
-            {
-                /*
-                 * Check for I/O redirection
-                 */
-                if (execute_redirection(tokens) == 0)
-                {
-                    /*
-                     * Normal external command
-                     */
-                    execute(tokens);
-                }
-            }
-
-            free_tokens(tokens);
+            printf("Unknown command: %s\n", command);
+            printf("Type 'help' for available commands.\n");
         }
-
-        free(line);
     }
-
-    printf("\nGoodbye from Cloud Administration Shell!\n");
 
     return 0;
 }

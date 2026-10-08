@@ -1,7 +1,8 @@
 #ifndef CLOUD_H
 #define CLOUD_H
 
-#define SHELL_NAME "Cloud Administration Shell"
-#define VERSION "2.0"
+void cloud_login(void);
+void cloud_logout(void);
+void cloud_status(void);
 
 #endif

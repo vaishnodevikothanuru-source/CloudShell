@@ -1,28 +1,27 @@
 CC = gcc
+
 CFLAGS = -Wall -Wextra -g -Iinclude
 
-SRC = src/main.c \
-      src/input.c \
-      src/parser.c \
-      src/process.c \
-      src/builtin.c \
-      src/signals.c \
-      src/pipes.c \
-      src/redirect.c
+LDFLAGS = -pthread
 
-TARGET = bin/cloudadmin_shell
+SRC = \
+	src/main.c \
+	src/cloud.c \
+	src/vm.c \
+	src/storage.c \
+	src/network.c \
+	src/monitor.c
+
+TARGET = bin/cloudadmin
 
 all: $(TARGET)
 
-$(TARGET): $(SRC)
+$(TARGET):
 	mkdir -p bin
-	$(CC) $(CFLAGS) $(SRC) -o $(TARGET)
+	$(CC) $(CFLAGS) $(SRC) $(LDFLAGS) -o $(TARGET)
 
 run: $(TARGET)
 	./$(TARGET)
 
-asan:
-	$(CC) $(CFLAGS) -fsanitize=address $(SRC) -o $(TARGET)
-
 clean:
-	rm -rf bin/*
+	rm -rf bin
